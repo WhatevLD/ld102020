@@ -37,7 +37,7 @@ func place(tile, skip_check = false):
 
 func remove(tile):
 	var last = tracks_placed.back()
-	if tile == last.pos:
+	if tile == last.pos and tracks_placed.size() > 1:
 		self.set_cellv(tile, -1)
 		path.curve.remove_point(last.point)
 		tracks_placed.pop_back()
