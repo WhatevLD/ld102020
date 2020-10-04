@@ -1,6 +1,7 @@
 extends TileMap
 
-onready var path = get_node("../Path2D")
+onready var path = get_node("../YSort/Path2D")
+onready var train = get_node("../YSort/Path2D/PathFollow2D/Train")
 onready var ghost = get_node("../Ghost")
 onready var camera = get_node("../Camera2D")
 
@@ -19,6 +20,7 @@ func _ready():
 	# add starting point
 	var tile = Vector2(1,1)
 	place(tile, true)
+	train.initial_resources()
 
 
 func is_valid_placement(tile):
@@ -33,13 +35,15 @@ func place(tile, skip_check = false):
 	if skip_check or is_valid_placement(tile):
 		if !skip_check:
 			place_mode = true
-		var center_of_tile = self.map_to_world(tile)
-		self.set_cellv(tile, 0)
-		path.curve.add_point(center_of_tile)		
-		var track = Track.new()
-		track.point = path.curve.get_point_count() - 1
-		track.pos = tile
-		tracks_placed.push_back(track)
+		if skip_check or train.can_build():
+			var center_of_tile = self.map_to_world(tile)
+			self.set_cellv(tile, 0)
+			path.curve.add_point(center_of_tile)		
+			var track = Track.new()
+			track.point = path.curve.get_point_count() - 1
+			track.pos = tile
+			tracks_placed.push_back(track)
+			train.build()
 
 func remove(tile):
 	var last = tracks_placed.back()
@@ -48,6 +52,7 @@ func remove(tile):
 		self.set_cellv(tile, -1)
 		path.curve.remove_point(last.point)
 		tracks_placed.pop_back()
+		train.unbuild()
 
 
 func _input(event):
