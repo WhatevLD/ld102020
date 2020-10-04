@@ -11,7 +11,9 @@ region = Rect2( 128, 320, 32, 32 )
 [sub_resource type="CircleShape2D" id=2]
 radius = 19.1282
 
-[node name="Resource" type="Node2D"]
+[node name="Resource" type="Node2D" groups=[
+"Resources",
+]]
 script = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]

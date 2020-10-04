@@ -12,6 +12,8 @@ var remove_mode = false
 var left_pressed = false
 var right_pressed = false
 
+const GRID_SIZE = 32
+
 class Track:
 	var point: int
 	var pos: Vector2
@@ -24,9 +26,15 @@ func _ready():
 
 
 func is_valid_placement(tile):
+	var pos = self.map_to_world(tile)
 	if self.get_cellv(tile) == -1:
 		var distance_placed = tile.distance_to(tracks_placed.back().pos)
 		if distance_placed == 1:
+			var resources = get_tree().get_nodes_in_group("Resources")
+			for node in resources:
+				var distance = pos.distance_to(node.position)
+				if distance < GRID_SIZE: 
+					return false
 			return true
 	return false
 	

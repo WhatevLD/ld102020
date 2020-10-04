@@ -13,7 +13,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	self.offset += 350 * delta
+	self.offset += 200 * delta
 	if self.unit_offset >= 1.0:
 		self.offset = 0
 

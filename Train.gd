@@ -26,8 +26,7 @@ func initial_resources():
 	resources["wood"] = 100
 	resources["iron"] = 100
 
-func _on_Area2D_area_entered(area):
-	print("entered " + str(area))
+func get_resources(area):
 	var resource_name = area.get_parent().resource_name
 	var num_resources = area.get_parent().num_resources
 	area.get_parent().num_resources = 0
@@ -35,10 +34,12 @@ func _on_Area2D_area_entered(area):
 	if !resources.has(resource_name):
 		resources[resource_name] = num_resources
 	else:		
-		resources[resource_name] += num_resources
-	print("Got " + resource_name + " " + str(num_resources) + " now at " + str(resources[resource_name]))
+		resources[resource_name] += num_resources	
+
+func _on_Area2D_area_entered(area):
+	get_resources(area)
 	
 
 
 func _on_Area2D_area_exited(area):
-	print("exited " + str(area))
+	get_resources(area)
