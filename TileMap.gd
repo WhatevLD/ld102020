@@ -2,8 +2,12 @@ extends TileMap
 
 onready var path = get_node("../Path2D")
 onready var ghost = get_node("../Ghost")
+onready var camera = get_node("../Camera2D")
+
 var tracks_placed = []
-var last_placed
+var last_mouse
+var place_mode = false
+var remove_mode = false
 var left_pressed = false
 var right_pressed = false
 
@@ -13,7 +17,7 @@ class Track:
 
 func _ready():
 	# add starting point
-	var tile = Vector2(0,0)
+	var tile = Vector2(1,1)
 	place(tile, true)
 
 
@@ -27,8 +31,10 @@ func is_valid_placement(tile):
 
 func place(tile, skip_check = false):
 	if skip_check or is_valid_placement(tile):
+		if !skip_check:
+			place_mode = true
 		var center_of_tile = self.map_to_world(tile)
-		self.set_cellv(tile, 1)
+		self.set_cellv(tile, 0)
 		path.curve.add_point(center_of_tile)		
 		var track = Track.new()
 		track.point = path.curve.get_point_count() - 1
@@ -38,6 +44,7 @@ func place(tile, skip_check = false):
 func remove(tile):
 	var last = tracks_placed.back()
 	if tile == last.pos and tracks_placed.size() > 1:
+		remove_mode = true
 		self.set_cellv(tile, -1)
 		path.curve.remove_point(last.point)
 		tracks_placed.pop_back()
@@ -48,9 +55,11 @@ func _input(event):
 		left_pressed = true
 		var mouse_pos = get_global_mouse_position()
 		var tile = world_to_map(mouse_pos)
+		last_mouse = mouse_pos
 		place(tile)
 	elif event.is_action_released("click"):
 		left_pressed = false
+		place_mode = false
 	elif event.is_action_pressed("right_click"):
 		right_pressed = true
 		var mouse_pos = get_global_mouse_position()
@@ -58,16 +67,29 @@ func _input(event):
 		remove(tile)
 	elif event.is_action_released("right_click"):
 		right_pressed = false
+		remove_mode = false
+	elif event.is_action_pressed("zoom_in"):
+		if camera.zoom.x > 1:
+			camera.zoom.x -= 0.1
+			camera.zoom.y -= 0.1
+	elif event.is_action_pressed("zoom_out"):
+		if camera.zoom.x < 2:
+			camera.zoom.x += 0.1
+			camera.zoom.y += 0.1	
 	elif event is InputEventMouseMotion:
 		var mouse_pos = get_global_mouse_position()
 		var tile = world_to_map(mouse_pos)
 		var center_of_tile = self.map_to_world(tile)
 		if left_pressed:
 			ghost.visible = false
-			place(tile)
+			if place_mode:
+				place(tile)
+			else:
+				camera.position += last_mouse - mouse_pos
 		elif right_pressed:
 			ghost.visible = false
-			remove(tile)
+			if remove_mode:
+				remove(tile)
 		else:
 			if is_valid_placement(tile):
 				ghost.modulate.a = 0.9
